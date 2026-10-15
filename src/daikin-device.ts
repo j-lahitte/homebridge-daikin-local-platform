@@ -80,6 +80,14 @@ export abstract class DaikinDevice {
     this._log = log;
   }
 
+  // Homebridge saves accessory.context, which holds this device, as JSON.
+  // Persist only the IP (the platform's cache lookups read nothing else):
+  // live state such as the BRP072C https.Agent holds circular sockets
+  // mid-request and would fail the save for the whole bridge.
+  public toJSON() {
+    return { IP: this.IP };
+  }
+
   public addCallback(callback: (device: DaikinDevice) => void) {
     this._callbacks.push(callback);
   }

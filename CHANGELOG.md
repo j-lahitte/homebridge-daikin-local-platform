@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.0.5 (2026-10-15)
+
+- Fixed: with a secure BRP072C adapter, Homebridge could fail to save its accessory cache (*Failed to save cached accessories to disk: Converting circular structure to JSON*), so accessories did not persist between restarts — on the main bridge, those of every plugin ([#19](https://github.com/tasict/homebridge-daikin-local-platform/issues/19)).
+- Fixed: removing a unit from `climateIPs` did not remove its accessory, and every unit that did not answer at startup logged *Error removing stale accessory*. A unit removed from the config, or replaced by another unit at its IP address, now loses its accessory at the next restart; a listed unit that is only offline keeps its accessory.
+
 ## 2.0.4 (2026-09-25)
 
 - New project website in English, Traditional Chinese and Japanese: [tasict.github.io/homebridge-daikin-local-platform](https://tasict.github.io/homebridge-daikin-local-platform/). It is now the plugin's homepage in the Homebridge UI.

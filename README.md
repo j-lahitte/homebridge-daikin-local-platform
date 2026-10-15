@@ -104,7 +104,7 @@ Tells Homebridge which platform this config belongs to. Leave as is.
 Will be displayed in the Homebridge log.
 
 * `climateIPs` (array):
-The IP addresses of the Daikin climate devices to be controlled.
+The IP addresses of the Daikin climate devices to be controlled. Removing an address removes its accessory at the next restart; a listed unit that does not answer at startup keeps its accessory, with its room and automations.
 
 Optional:
 

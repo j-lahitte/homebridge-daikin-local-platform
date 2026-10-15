@@ -235,29 +235,29 @@ export default class DaikinPlatform implements DynamicPlatformPlugin {
 
     await this.reconcileProtocolSwitches();
 
+    // A cached accessory no unit answered for is stale once its IP left the
+    // config, or when another unit answers at that IP (adapter replaced); a
+    // configured unit that is merely offline keeps its accessory. Restored
+    // from disk, context.device is only the saved { IP } (no methods).
+    const liveUUIDs = new Set(Object.keys(this.DaikinDevices).map((mac) => this.api.hap.uuid.generate(mac)));
+    const liveIPs = new Set(Object.values(this.DaikinDevices).map((device) => device.IP));
+
     for (const cachedAccessory of this.accessories) {
 
-      if (cachedAccessory.context.device) {
+      const ip = cachedAccessory.context.device?.IP;
 
-        try{
+      if (!cachedAccessory.context.device || liveUUIDs.has(cachedAccessory.UUID)
+        || (this.configListHas(this.platformConfig.climateIPs, ip) && !liveIPs.has(ip))) {
+        continue;
+      }
 
-          const guid = cachedAccessory.context.device.getMacAddress();
-          const daikinDevice = this.DaikinDevices[guid];
-  
-          if (daikinDevice === undefined) {
-  
-            this.log.info(`Removing accessory '${cachedAccessory.displayName}' (${guid}) `
-              + 'because it does not exist on the config.');
-  
-            this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [cachedAccessory]);
-          }
-
-        }catch (e) {
-          this.log.error(`Error removing stale accessory ${cachedAccessory.displayName}: ${e}`);
-          continue;
-        }
-
-
+      try {
+        this.log.info(`Removing accessory '${cachedAccessory.displayName}' because `
+          + (liveIPs.has(ip) ? `another unit now answers at ${ip}.` : `${ip} is no longer in the config.`));
+        this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [cachedAccessory]);
+      }
+      catch (e) {
+        this.log.error(`Error removing stale accessory ${cachedAccessory.displayName}: ${e}`);
       }
     }
 
